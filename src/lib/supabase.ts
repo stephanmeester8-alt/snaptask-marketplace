@@ -20,7 +20,7 @@ export function getSupabase() {
 
 // Lazy export voor backwards compatibility
 export const supabase = new Proxy({} as any, {
-  get: (target, prop) => {
+  get: (_target, prop) => {
     return getSupabase()[prop as keyof ReturnType<typeof createClient>];
   },
 });
