@@ -1,25 +1,32 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { supabase } from "@/lib/supabase";
 
 export default function Home() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [supabase, setSupabase] = useState<any>(null);
 
   useEffect(() => {
-    const getUser = async () => {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      setUser(user);
-      setLoading(false);
-    };
+    // Dynamisch importeren client-side
+    import("@/lib/supabase").then(({ supabase: sb }) => {
+      setSupabase(sb);
 
-    getUser();
+      const getUser = async () => {
+        const {
+          data: { user },
+        } = await sb.auth.getUser();
+        setUser(user);
+        setLoading(false);
+      };
+
+      getUser();
+    });
   }, []);
 
   const handleSignIn = async () => {
+    if (!supabase) return;
+
     const { error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
@@ -33,6 +40,7 @@ export default function Home() {
   };
 
   const handleSignOut = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
     setUser(null);
   };
